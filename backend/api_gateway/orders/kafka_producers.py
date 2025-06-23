@@ -1,14 +1,23 @@
-from kafka import KafkaProducer
+# orders/kafka_producers.py
 
+import time
 import json
-from decouple import config
+from kafka import KafkaProducer
+from kafka.errors import NoBrokersAvailable
 
-producer = KafkaProducer(
-    bootstrap_servers=config("KAFKA_BROKER", default="localhost:9092"),
-    value_serializer=lambda v: json.dumps(v).encode('utf-8')
-)                         
+# Retry logic to wait for Kafka
+while True:
+    try:
+        producer = KafkaProducer(
+            bootstrap_servers='localhost:9092',
+            value_serializer=lambda v: json.dumps(v).encode("utf-8")
+        )
+        print("✅ Kafka Producer connected.")
+        break
+    except NoBrokersAvailable:
+        print("⏳ Waiting for Kafka broker...")
+        time.sleep(5)
 
-def send_order_event(event_data):
-    print(f"[Kafka] Sending: {event_data}")
-    producer.send("order_placed",event_data)
-    producer.flush()
+def send_order_event(data):
+    producer.send('order_placed', value=data)
+    print(f"📤 Sent order_placed event: {data}")

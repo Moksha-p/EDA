@@ -1,4 +1,3 @@
-version: '3.8'
 
 services:
   postgres:
@@ -26,16 +25,16 @@ services:
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
     ports:
       - "9092:9092"
 
   django:
     build:
-      context: ./backend/api_gateway
+      context: ./api_gateway
     volumes:
-      - ./backend/api_gateway:/code
+      - ./api_gateway:/code
     ports:
       - "8000:8000"
     depends_on:
@@ -48,6 +47,19 @@ services:
       POSTGRES_HOST: postgres
       POSTGRES_PORT: 5432
       KAFKA_BROKER: kafka:9092
+    networks:
+      - kafka-network
+
+  inventory_service:
+      build:
+        context: ./inventory_service
+      depends_on:
+        - kafka
+      networks:
+        - kafka-network
 
 volumes:
   postgres_data:
+
+networks:
+  kafka-network:
