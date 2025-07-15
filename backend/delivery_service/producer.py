@@ -4,7 +4,7 @@ from kafka import KafkaProducer
 import json
 import os
 
-KAFKA_BROKER = os.getenv("KAFKA_BROKER", "localhost:9092")
+KAFKA_BROKER ='kafka:9092'
 
 try:
     producer = KafkaProducer(

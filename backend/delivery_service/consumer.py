@@ -1,26 +1,45 @@
-# delivery_service/consumer.py
+# # delivery_service/consumer.py
 
+# from kafka import KafkaConsumer
+# import json
+# from producer import send_delivery_event
+
+# consumer = KafkaConsumer(
+#     'inventory_checked',
+#     bootstrap_servers='localhost:9092',
+#     value_deserializer=lambda m: json.loads(m.decode('utf-8')),
+#     auto_offset_reset='earliest',
+#     group_id='delivery-group',
+# )
+
+# print("✅ Delivery Service is running...")
+
+# for message in consumer:
+#     inventory = message.value
+#     print(f"📦 Delivery started for Order ID: {inventory['order_id']}")
+
+#     delivery_data = {
+#         "order_id": inventory['order_id'],
+#         "status": "dispatched"
+#     }
+
+#     send_delivery_event("delivery_started", delivery_data)
 from kafka import KafkaConsumer
 import json
 from producer import send_delivery_event
+import os
 
-consumer = KafkaConsumer(
-    'inventory_checked',
-    bootstrap_servers='localhost:9092',
-    value_deserializer=lambda m: json.loads(m.decode('utf-8')),
-    auto_offset_reset='earliest',
-    group_id='delivery-group',
-)
+PENDING_DELIVERIES = []
+def consume_inventory_checked():
+    consumer = KafkaConsumer(
+        'inventory_checked',
+        bootstrap_servers='kafka:9092',
+        value_deserializer=lambda m: json.loads(m.decode('utf-8')),
+        auto_offset_reset='earliest',
+        group_id='delivery-group'
+    )
+    for msg in consumer:
+        order_data = msg.value
+        print("Ready to start delivery for:", order_data)
+        PENDING_DELIVERIES.append(order_data)
 
-print("✅ Delivery Service is running...")
-
-for message in consumer:
-    inventory = message.value
-    print(f"📦 Delivery started for Order ID: {inventory['order_id']}")
-
-    delivery_data = {
-        "order_id": inventory['order_id'],
-        "status": "dispatched"
-    }
-
-    send_delivery_event("delivery_started", delivery_data)

@@ -43,7 +43,8 @@ INSTALLED_APPS = [
     'rest_framework',
     'orders',
     'rest_framework_simplejwt',
-    'corsheaders'
+    'corsheaders',
+    'django_extensions',
 ]
 
 MIDDLEWARE = [
